@@ -21,9 +21,11 @@
 <table class="table">
     <thead>
         <tr>
+            <th></th>
             <th>Name</th>
             <th>Description</th>
             <th>Price</th>
+            <th>Status</th>
             <th></th>
         </tr>
     </thead>
@@ -31,12 +33,31 @@
 @foreach (var item in Model.Items)
 {
         <tr>
+            <td>
+                @if (item.Images.Any())
+                {
+                    <img src="/uploads/@item.Images.First().FileName" alt="@item.Name" style="max-width:80px;" />
+                }
+            </td>
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>@(item.Price == null ? "Free" : item.Price?.ToString("C"))</td>
+            <td>@(item.IsSold ? "Sold" : item.IsReserved ? "Reserved" : "Available")</td>
             <td>
                 <div class="btn-group" role="group">
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                    @if (!item.IsSold)
+                    {
+                        <form asp-action="MarkSold" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">Mark Sold</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="MarkAvailable" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success">Mark Available</button>
+                        </form>
+                    }
                     <form asp-action="Archive" asp-route-id="@item.Id" method="post" class="d-inline">
                         <button type="submit" class="btn btn-sm btn-warning">Archive</button>
                     </form>

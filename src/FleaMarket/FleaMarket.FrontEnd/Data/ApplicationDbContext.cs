@@ -13,5 +13,6 @@ namespace FleaMarket.FrontEnd.Data
 
         public DbSet<Item> Items { get; set; } = default!;
         public DbSet<ItemImage> ItemImages { get; set; } = default!;
+        public DbSet<Reservation> Reservations { get; set; } = default!;
     }
 }

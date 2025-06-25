@@ -3,12 +3,20 @@
 
 // Write your JavaScript code.
 
-// Handle reservation button clicks on the listings page.
-$(document).on('click', '.reserve-button', function () {
-    const itemName = $(this).data('item-name');
-    const sellerEmail = $(this).data('seller-email');
-    const confirmed = confirm('Reserve "' + itemName + '"?\n\nYou will need to contact the seller directly to complete the purchase.');
-    if (confirmed) {
-        alert('Reservation noted! Please email ' + sellerEmail + ' to arrange pickup or payment.');
-    }
+
+// Preview selected images when listing an item.
+$(document).on('change', '#images', function () {
+    const preview = $('#imagePreview');
+    preview.empty();
+    const files = this.files;
+    if (!files) return;
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const col = $('<div class="col-6 col-md-3 mb-2"></div>');
+            $('<img class="img-fluid" />').attr('src', e.target.result).appendTo(col);
+            col.appendTo(preview);
+        };
+        reader.readAsDataURL(file);
+    });
 });

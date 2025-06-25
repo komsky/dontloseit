@@ -1,30 +1,60 @@
-@model List<FleaMarket.FrontEnd.Models.Item>
+@model FleaMarket.FrontEnd.Models.ItemsIndexViewModel
 @{
     ViewData["Title"] = "Listings";
 }
 
 <h1>All Listings</h1>
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-auto">
+        <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
+            <th></th>
             <th>Name</th>
             <th>Description</th>
             <th>Price</th>
             <th>Seller</th>
+            <th>Status</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model)
+@foreach (var item in Model.Items)
 {
         <tr>
+            <td>
+                @if (item.Images.Any())
+                {
+                    <img src="/uploads/@item.Images.First().FileName" alt="@item.Name" style="max-width:80px;" />
+                }
+            </td>
             <td>@item.Name</td>
             <td>@item.Description</td>
             <td>@(item.Price == null ? "Free" : item.Price?.ToString("C"))</td>
             <td>@item.Owner?.Email</td>
             <td>
-                <button type="button" class="btn btn-sm btn-primary reserve-button" data-item-name="@item.Name" data-seller-email="@item.Owner?.Email">Reserve</button>
+                @(item.IsReserved ? "Reserved" : item.IsSold ? "Sold" : "Available")
+            </td>
+            <td>
+                @if (!item.IsReserved && !item.IsSold)
+                {
+                    <form asp-action="Reserve" asp-route-id="@item.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-primary">Reserve</button>
+                    </form>
+                }
             </td>
         </tr>
 }
