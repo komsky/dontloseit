@@ -19,4 +19,19 @@ html {
 
 body {
   margin-bottom: 60px;
+  background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2 {
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+header .navbar {
+  background-color: #4a90e2;
+}
+
+footer {
+  background-color: #f8f9fa;
 }
