@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using FleaMarket.FrontEnd.Models;
 
 namespace FleaMarket.FrontEnd.Data
 {
@@ -9,5 +10,8 @@ namespace FleaMarket.FrontEnd.Data
             : base(options)
         {
         }
+
+        public DbSet<Item> Items { get; set; } = default!;
+        public DbSet<ItemImage> ItemImages { get; set; } = default!;
     }
 }
