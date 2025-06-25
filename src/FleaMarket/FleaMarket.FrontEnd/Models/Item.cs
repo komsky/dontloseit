@@ -16,6 +16,8 @@ namespace FleaMarket.FrontEnd.Models
 
         public decimal? Price { get; set; }
 
+        public bool IsArchived { get; set; }
+
         public string? OwnerId { get; set; }
         public IdentityUser? Owner { get; set; }
 

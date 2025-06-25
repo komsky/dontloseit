@@ -3,6 +3,7 @@ using FleaMarket.FrontEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FleaMarket.FrontEnd.Controllers
 {
@@ -71,6 +72,116 @@ namespace FleaMarket.FrontEnd.Controllers
             }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index(string? search, bool showArchived = false)
+        {
+            var userId = _userManager.GetUserId(User);
+            var query = _context.Items
+                .Include(i => i.Images)
+                .Where(i => i.OwnerId == userId);
+
+            if (!showArchived)
+            {
+                query = query.Where(i => !i.IsArchived);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(i => i.Name.Contains(search) || (i.Description != null && i.Description.Contains(search)));
+            }
+
+            var items = await query
+                .OrderBy(i => i.Price == null ? 0 : 1)
+                .ThenBy(i => i.Name)
+                .ToListAsync();
+
+            var model = new ItemsIndexViewModel
+            {
+                Items = items,
+                Search = search,
+                ShowArchived = showArchived
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ItemCreateViewModel
+            {
+                Name = item.Name,
+                Description = item.Description,
+                IsFree = item.Price == null,
+                Price = item.Price
+            };
+
+            ViewData["ItemId"] = id;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ItemCreateViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewData["ItemId"] = id;
+                return View(model);
+            }
+
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            item.Name = model.Name;
+            item.Description = model.Description;
+            item.Price = model.IsFree ? null : model.Price;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item != null)
+            {
+                _context.Items.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Archive(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item != null)
+            {
+                item.IsArchived = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
