@@ -18,6 +18,10 @@ namespace FleaMarket.FrontEnd.Models
 
         public bool IsArchived { get; set; }
 
+        public bool IsReserved { get; set; }
+
+        public bool IsSold { get; set; }
+
         public string? OwnerId { get; set; }
         public IdentityUser? Owner { get; set; }
 

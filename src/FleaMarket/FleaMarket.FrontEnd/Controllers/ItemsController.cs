@@ -111,18 +111,21 @@ namespace FleaMarket.FrontEnd.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var userId = _userManager.GetUserId(User);
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            var item = await _context.Items
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
             if (item == null)
             {
                 return NotFound();
             }
 
-            var model = new ItemCreateViewModel
+            var model = new ItemEditViewModel
             {
                 Name = item.Name,
                 Description = item.Description,
                 IsFree = item.Price == null,
-                Price = item.Price
+                Price = item.Price,
+                ExistingImages = item.Images.ToList()
             };
 
             ViewData["ItemId"] = id;
@@ -131,7 +134,7 @@ namespace FleaMarket.FrontEnd.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ItemCreateViewModel model)
+        public async Task<IActionResult> Edit(int id, ItemEditViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -140,7 +143,9 @@ namespace FleaMarket.FrontEnd.Controllers
             }
 
             var userId = _userManager.GetUserId(User);
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            var item = await _context.Items
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
             if (item == null)
             {
                 return NotFound();
@@ -149,6 +154,30 @@ namespace FleaMarket.FrontEnd.Controllers
             item.Name = model.Name;
             item.Description = model.Description;
             item.Price = model.IsFree ? null : model.Price;
+
+            if (model.RemoveImageIds?.Count > 0)
+            {
+                var toRemove = item.Images.Where(img => model.RemoveImageIds.Contains(img.Id)).ToList();
+                _context.ItemImages.RemoveRange(toRemove);
+            }
+
+            if (model.Images != null && model.Images.Count > 0)
+            {
+                var uploadDir = Path.Combine(_env.WebRootPath, "uploads");
+                Directory.CreateDirectory(uploadDir);
+
+                foreach (var image in model.Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+                        var filePath = Path.Combine(uploadDir, fileName);
+                        using var stream = new FileStream(filePath, FileMode.Create);
+                        await image.CopyToAsync(stream);
+                        item.Images.Add(new ItemImage { FileName = fileName });
+                    }
+                }
+            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -178,6 +207,37 @@ namespace FleaMarket.FrontEnd.Controllers
             if (item != null)
             {
                 item.IsArchived = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkSold(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item != null)
+            {
+                item.IsSold = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAvailable(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            if (item != null)
+            {
+                item.IsSold = false;
+                item.IsReserved = false;
                 await _context.SaveChangesAsync();
             }
 
