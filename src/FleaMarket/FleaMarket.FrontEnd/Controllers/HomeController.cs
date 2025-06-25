@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using FleaMarket.FrontEnd.Models;
+using FleaMarket.FrontEnd.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FleaMarket.FrontEnd.Controllers
@@ -7,15 +9,23 @@ namespace FleaMarket.FrontEnd.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var items = await _context.Items
+                .Include(i => i.Owner)
+                .Where(i => !i.IsArchived)
+                .OrderBy(i => i.Price == null ? 0 : 1)
+                .ThenBy(i => i.Name)
+                .ToListAsync();
+            return View(items);
         }
 
         public IActionResult Privacy()

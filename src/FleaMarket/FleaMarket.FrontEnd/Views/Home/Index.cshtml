@@ -1,8 +1,33 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model List<FleaMarket.FrontEnd.Models.Item>
+@{
+    ViewData["Title"] = "Listings";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>All Listings</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Seller</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Description</td>
+            <td>@(item.Price == null ? "Free" : item.Price?.ToString("C"))</td>
+            <td>@item.Owner?.Email</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-primary reserve-button" data-item-name="@item.Name" data-seller-email="@item.Owner?.Email">Reserve</button>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
