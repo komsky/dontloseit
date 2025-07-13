@@ -84,7 +84,7 @@ namespace FleaMarket.FrontEnd.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Message"] = "Reservation recorded.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Reservations");
         }
     }
 }
