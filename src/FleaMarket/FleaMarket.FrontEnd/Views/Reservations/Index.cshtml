@@ -1,0 +1,51 @@
+@model List<FleaMarket.FrontEnd.Models.Reservation>
+@{
+    ViewData["Title"] = "My Reservations";
+}
+
+<h1>My Reservations</h1>
+<p class="lead">Items you have reserved. Cancel if you no longer want them.</p>
+
+@if (!Model.Any())
+{
+    <p>You have no reservations.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Reserved On</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+@foreach (var res in Model)
+{
+            <tr>
+                <td>
+                    @if (res.Item.Images.Any())
+                    {
+                        <img src="/uploads/@res.Item.Images.First().FileName" alt="@res.Item.Name" style="max-width:80px;" />
+                    }
+                </td>
+                <td>
+                    <a asp-controller="Items" asp-action="Details" asp-route-id="@res.ItemId">@res.Item.Name</a>
+                </td>
+                <td>@res.Item.Description</td>
+                <td>@(res.Item.Price == null ? "Free" : res.Item.Price?.ToString("C"))</td>
+                <td>@res.Created.ToLocalTime().ToString("g")</td>
+                <td>
+                    <form asp-action="Cancel" asp-route-id="@res.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>
+}
