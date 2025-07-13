@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using FleaMarket.FrontEnd.Models;
 using FleaMarket.FrontEnd.Data;
+using FleaMarket.FrontEnd.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -11,11 +12,13 @@ namespace FleaMarket.FrontEnd.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, IEmailService emailService)
         {
             _logger = logger;
             _context = context;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index(string? search)
@@ -66,7 +69,9 @@ namespace FleaMarket.FrontEnd.Controllers
                 return Challenge();
             }
 
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && !i.IsArchived && !i.IsSold);
+            var item = await _context.Items
+                .Include(i => i.Owner)
+                .FirstOrDefaultAsync(i => i.Id == id && !i.IsArchived && !i.IsSold);
             if (item == null)
             {
                 return NotFound();
@@ -82,6 +87,13 @@ namespace FleaMarket.FrontEnd.Controllers
             _context.Reservations.Add(reservation);
 
             await _context.SaveChangesAsync();
+
+            if (item.Owner?.Email != null)
+            {
+                var buyer = await _context.Users.FindAsync(userId);
+                var body = $"Your item '{item.Name}' has been reserved by {buyer?.Email}.";
+                await _emailService.SendEmailAsync(item.Owner.Email, "Item reserved", body);
+            }
 
             TempData["Message"] = "Reservation recorded.";
             return RedirectToAction("Index", "Reservations");

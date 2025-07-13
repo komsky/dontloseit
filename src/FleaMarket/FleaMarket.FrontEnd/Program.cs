@@ -1,4 +1,5 @@
 using FleaMarket.FrontEnd.Data;
+using FleaMarket.FrontEnd.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,9 @@ namespace FleaMarket.FrontEnd
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+            builder.Services.AddTransient<IEmailService, SmtpEmailService>();
 
             var app = builder.Build();
 
