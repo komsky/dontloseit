@@ -1,5 +1,6 @@
 using FleaMarket.FrontEnd.Data;
 using FleaMarket.FrontEnd.Models;
+using FleaMarket.FrontEnd.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,12 +14,14 @@ namespace FleaMarket.FrontEnd.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IWebHostEnvironment _env;
+        private readonly IEmailService _emailService;
 
-        public ItemsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env)
+        public ItemsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
             _env = env;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -218,11 +221,19 @@ namespace FleaMarket.FrontEnd.Controllers
         public async Task<IActionResult> MarkSold(int id)
         {
             var userId = _userManager.GetUserId(User);
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+            var item = await _context.Items
+                .Include(i => i.Owner)
+                .FirstOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
             if (item != null)
             {
                 item.IsSold = true;
                 await _context.SaveChangesAsync();
+
+                if (item.Owner?.Email != null)
+                {
+                    var body = $"Your item '{item.Name}' was marked as sold.";
+                    await _emailService.SendEmailAsync(item.Owner.Email, "Item sold", body);
+                }
             }
 
             return RedirectToAction(nameof(Index));
