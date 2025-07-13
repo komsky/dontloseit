@@ -42,7 +42,11 @@
                     <img src="/uploads/@item.Images.First().FileName" alt="@item.Name" style="max-width:80px;" />
                 }
             </td>
-            <td>@item.Name</td>
+            <td>
+                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id">
+                    @item.Name
+                </a>
+            </td>
             <td>@item.Description</td>
             <td>@(item.Price == null ? "Free" : item.Price?.ToString("C"))</td>
             <td>@item.Owner?.Email</td>

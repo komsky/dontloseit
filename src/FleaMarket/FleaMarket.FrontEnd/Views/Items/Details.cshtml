@@ -1,0 +1,47 @@
+@model FleaMarket.FrontEnd.Models.Item
+@{
+    ViewData["Title"] = "Item Details";
+}
+
+<h1>@Model.Name</h1>
+<div class="row mb-4">
+    <div class="col-md-6">
+        @if (Model.Images.Any())
+        {
+            <div id="itemCarousel" class="carousel slide mb-3">
+                <div class="carousel-inner">
+                @for (int i = 0; i < Model.Images.Count; i++)
+                {
+                    var img = Model.Images.ElementAt(i);
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <img src="/uploads/@img.FileName" class="d-block w-100" alt="@Model.Name" />
+                    </div>
+                }
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#itemCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#itemCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        }
+    </div>
+    <div class="col-md-6">
+        <p>@Model.Description</p>
+        <p><strong>Price:</strong> @(Model.Price == null ? "Free" : Model.Price?.ToString("C"))</p>
+        <p><strong>Seller:</strong> @Model.Owner?.Email</p>
+        @if (!Model.IsReserved && !Model.IsSold)
+        {
+            <form asp-controller="Home" asp-action="Reserve" asp-route-id="@Model.Id" method="post">
+                <button type="submit" class="btn btn-primary">Reserve</button>
+            </form>
+        }
+        else
+        {
+            <span class="badge bg-secondary">@(Model.IsSold ? "Sold" : "Reserved")</span>
+        }
+    </div>
+</div>
