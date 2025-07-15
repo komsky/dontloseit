@@ -161,7 +161,7 @@ namespace FleaMarket.FrontEnd.Data.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+            modelBuilder.Entity("FleaMarket.FrontEnd.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -198,6 +198,9 @@ namespace FleaMarket.FrontEnd.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileImageFileName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -313,7 +316,7 @@ namespace FleaMarket.FrontEnd.Data.Migrations
 
             modelBuilder.Entity("FleaMarket.FrontEnd.Models.Item", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Owner")
+                    b.HasOne("FleaMarket.FrontEnd.Models.ApplicationUser", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
@@ -333,7 +336,7 @@ namespace FleaMarket.FrontEnd.Data.Migrations
 
             modelBuilder.Entity("FleaMarket.FrontEnd.Models.Reservation", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Buyer")
+                    b.HasOne("FleaMarket.FrontEnd.Models.ApplicationUser", "Buyer")
                         .WithMany()
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Cascade)

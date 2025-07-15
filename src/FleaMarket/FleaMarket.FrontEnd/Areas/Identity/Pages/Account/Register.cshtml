@@ -5,7 +5,7 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div class="form-floating mb-3">
         <input asp-for="Input.Email" class="form-control" placeholder="Email" />
         <label asp-for="Input.Email"></label>
@@ -25,6 +25,11 @@
         <input asp-for="Input.SitePassword" class="form-control" placeholder="Site password" />
         <label asp-for="Input.SitePassword">Site Password</label>
         <span asp-validation-for="Input.SitePassword" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.ProfileImage" class="form-label"></label>
+        <input asp-for="Input.ProfileImage" class="form-control" type="file" />
+        <span asp-validation-for="Input.ProfileImage" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Register</button>
 </form>

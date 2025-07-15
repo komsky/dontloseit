@@ -12,11 +12,11 @@ namespace FleaMarket.FrontEnd.Controllers
     public class ItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _env;
         private readonly IEmailService _emailService;
 
-        public ItemsController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IWebHostEnvironment env, IEmailService emailService)
+        public ItemsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment env, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;

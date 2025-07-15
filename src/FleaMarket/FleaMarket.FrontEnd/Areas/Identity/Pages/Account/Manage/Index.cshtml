@@ -1,0 +1,26 @@
+@page
+@model FleaMarket.FrontEnd.Areas.Identity.Pages.Account.Manage.IndexModel
+@{
+    ViewData["Title"] = "Profile";
+}
+<h1>Profile</h1>
+
+<form method="post" enctype="multipart/form-data" class="mb-3">
+    <div class="mb-3">
+        <label asp-for="Input.ProfileImage" class="form-label"></label>
+        <input asp-for="Input.ProfileImage" type="file" class="form-control" />
+        <span asp-validation-for="Input.ProfileImage" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+@if (Model.CurrentImage != null)
+{
+    <div>
+        <img src="/uploads/@Model.CurrentImage" alt="Profile" style="max-width:150px;" />
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
