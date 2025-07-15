@@ -32,7 +32,14 @@
     <div class="col-md-6">
         <p>@Model.Description</p>
         <p><strong>Price:</strong> @(Model.Price == null ? "Free" : Model.Price?.ToString("C"))</p>
-        <p><strong>Seller:</strong> @Model.Owner?.Email</p>
+        <p>
+            <strong>Seller:</strong>
+            @if (Model.Owner?.ProfileImageFileName != null)
+            {
+                <img src="/uploads/@Model.Owner.ProfileImageFileName" alt="@Model.Owner.Email" style="width:32px;height:32px;border-radius:50%;margin-right:4px;" />
+            }
+            @Model.Owner?.Email
+        </p>
         @if (!Model.IsReserved && !Model.IsSold)
         {
             <form asp-controller="Home" asp-action="Reserve" asp-route-id="@Model.Id" method="post">

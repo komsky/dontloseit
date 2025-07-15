@@ -1,6 +1,7 @@
 using FleaMarket.FrontEnd.Data;
 using FleaMarket.FrontEnd.Services;
 using Microsoft.AspNetCore.Identity;
+using FleaMarket.FrontEnd.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FleaMarket.FrontEnd
@@ -17,7 +18,7 @@ namespace FleaMarket.FrontEnd
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 

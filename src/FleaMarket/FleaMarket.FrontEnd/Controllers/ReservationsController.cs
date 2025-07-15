@@ -11,9 +11,9 @@ namespace FleaMarket.FrontEnd.Controllers
     public class ReservationsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ReservationsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public ReservationsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -26,6 +26,8 @@ namespace FleaMarket.FrontEnd.Controllers
             var reservations = await _context.Reservations
                 .Include(r => r.Item)
                     .ThenInclude(i => i.Images)
+                .Include(r => r.Item)
+                    .ThenInclude(i => i.Owner)
                 .Where(r => r.BuyerId == userId)
                 .OrderByDescending(r => r.Created)
                 .ToListAsync();

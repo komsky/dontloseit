@@ -4,26 +4,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using FleaMarket.FrontEnd.Models;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System;
+using Microsoft.AspNetCore.Hosting;
 
 namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IWebHostEnvironment env)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _configuration = configuration;
+            _env = env;
         }
 
         [BindProperty]
@@ -50,6 +58,9 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
             [DataType(DataType.Password)]
             [Display(Name = "Site Password")]
             public string SitePassword { get; set; } = string.Empty;
+
+            [Display(Name = "Profile Image")]
+            public IFormFile? ProfileImage { get; set; }
         }
 
         public void OnGet(string? returnUrl = null)
@@ -72,7 +83,19 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+            var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
+
+            if (Input.ProfileImage != null && Input.ProfileImage.Length > 0)
+            {
+                var uploadDir = Path.Combine(_env.WebRootPath, "uploads");
+                Directory.CreateDirectory(uploadDir);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(Input.ProfileImage.FileName);
+                var filePath = Path.Combine(uploadDir, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await Input.ProfileImage.CopyToAsync(stream);
+                user.ProfileImageFileName = fileName;
+            }
+
             var result = await _userManager.CreateAsync(user, Input.Password);
             if (result.Succeeded)
             {

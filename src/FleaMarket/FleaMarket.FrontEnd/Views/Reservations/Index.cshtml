@@ -19,6 +19,7 @@ else
                 <th>Name</th>
                 <th>Description</th>
                 <th>Price</th>
+                <th>Seller</th>
                 <th>Reserved On</th>
                 <th></th>
             </tr>
@@ -38,6 +39,13 @@ else
                 </td>
                 <td>@res.Item.Description</td>
                 <td>@(res.Item.Price == null ? "Free" : res.Item.Price?.ToString("C"))</td>
+                <td>
+                    @if (res.Item.Owner?.ProfileImageFileName != null)
+                    {
+                        <img src="/uploads/@res.Item.Owner.ProfileImageFileName" alt="@res.Item.Owner.Email" style="width:32px;height:32px;border-radius:50%;margin-right:4px;" />
+                    }
+                    @res.Item.Owner?.Email
+                </td>
                 <td>@res.Created.ToLocalTime().ToString("g")</td>
                 <td>
                     <form asp-action="Cancel" asp-route-id="@res.Id" method="post" class="d-inline">

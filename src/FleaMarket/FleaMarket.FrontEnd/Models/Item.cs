@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
 
 namespace FleaMarket.FrontEnd.Models
 {
@@ -23,7 +22,7 @@ namespace FleaMarket.FrontEnd.Models
         public bool IsSold { get; set; }
 
         public string? OwnerId { get; set; }
-        public IdentityUser? Owner { get; set; }
+        public ApplicationUser? Owner { get; set; }
 
         public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
     }
