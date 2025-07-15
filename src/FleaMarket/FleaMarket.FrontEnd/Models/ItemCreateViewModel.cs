@@ -16,6 +16,9 @@ namespace FleaMarket.FrontEnd.Models
         [Range(0, double.MaxValue)]
         public decimal? Price { get; set; }
 
+        [DataType(DataType.DateTime)]
+        public DateTime? Deadline { get; set; }
+
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
     }
 }
