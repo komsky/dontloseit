@@ -44,6 +44,7 @@ namespace FleaMarket.FrontEnd.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 Price = model.IsFree ? null : model.Price,
+                Deadline = model.Deadline,
                 OwnerId = _userManager.GetUserId(User)
             };
 
@@ -128,6 +129,7 @@ namespace FleaMarket.FrontEnd.Controllers
                 Description = item.Description,
                 IsFree = item.Price == null,
                 Price = item.Price,
+                Deadline = item.Deadline,
                 ExistingImages = item.Images.ToList()
             };
 
@@ -157,6 +159,7 @@ namespace FleaMarket.FrontEnd.Controllers
             item.Name = model.Name;
             item.Description = model.Description;
             item.Price = model.IsFree ? null : model.Price;
+            item.Deadline = model.Deadline;
 
             if (model.RemoveImageIds?.Count > 0)
             {

@@ -32,6 +32,7 @@
     <div class="col-md-6">
         <p>@Model.Description</p>
         <p><strong>Price:</strong> @(Model.Price == null ? "Free" : Model.Price?.ToString("C"))</p>
+        <p><strong>Deadline:</strong> @Model.Deadline?.ToString("g")</p>
         <p>
             <strong>Seller:</strong>
             @if (Model.Owner?.ProfileImageFileName != null)

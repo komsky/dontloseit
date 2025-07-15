@@ -15,6 +15,8 @@ namespace FleaMarket.FrontEnd.Models
 
         public decimal? Price { get; set; }
 
+        public DateTime? Deadline { get; set; }
+
         public bool IsArchived { get; set; }
 
         public bool IsReserved { get; set; }
