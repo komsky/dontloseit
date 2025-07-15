@@ -26,6 +26,8 @@ namespace FleaMarket.FrontEnd
 
             var app = builder.Build();
 
+            ConfigureDatabase(app);
+
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -51,6 +53,16 @@ namespace FleaMarket.FrontEnd
             app.MapRazorPages();
 
             app.Run();
+        }
+
+        private static void ConfigureDatabase(WebApplication app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
+            }
         }
     }
 }

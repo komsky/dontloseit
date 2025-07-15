@@ -24,13 +24,47 @@ jobs:
       - name: Publish
         run: dotnet publish src/FleaMarket/FleaMarket.FrontEnd/FleaMarket.FrontEnd.csproj -c Release -o publish
 
-      - name: Deploy to IIS folder
+      # 1) Stop IIS app-pool and site so files aren’t locked
+      - name: Stop IIS site & app-pool
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          if (Test-Path IIS:\AppPools\FleaMarketAppPool) {
+            Write-Host "Stopping app-pool 'FleaMarketAppPool'…"
+            Stop-WebAppPool -Name 'FleaMarketAppPool'
+          }
+          if (Test-Path IIS:\Sites\FleaMarket) {
+            Write-Host "Stopping site 'FleaMarket'…"
+            Stop-Website -Name 'FleaMarket'
+          }
+
+      # 2) Clean out the folder, ignoring any access-denied errors
+      - name: Clean destination folder
         shell: powershell
         run: |
           $destination = 'C:\inetpub\wwwroot\fleamarket'
           if (Test-Path $destination) {
-            Remove-Item "$destination\*" -Recurse -Force
+            Write-Host "Removing existing files…"
+            Remove-Item "$destination\*" -Recurse -Force -ErrorAction SilentlyContinue
           } else {
+            Write-Host "Creating folder $destination…"
             New-Item -ItemType Directory -Path $destination | Out-Null
           }
-          Copy-Item -Path publish\* -Destination $destination -Recurse
+
+      # 3) Copy in the new publish output
+      - name: Deploy to IIS folder
+        shell: powershell
+        run: |
+          $destination = 'C:\inetpub\wwwroot\fleamarket'
+          Write-Host "Copying published files…"
+          Copy-Item -Path publish\* -Destination $destination -Recurse -Force
+
+      # 4) Restart site & app-pool
+      - name: Start IIS site & app-pool
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          Write-Host "Starting app-pool 'FleaMarketAppPool'…"
+          Start-WebAppPool -Name 'FleaMarketAppPool'
+          Write-Host "Starting site 'FleaMarket'…"
+          Start-Website -Name 'FleaMarket'
