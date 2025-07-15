@@ -23,6 +23,10 @@ namespace FleaMarket.FrontEnd.Controllers
 
         public async Task<IActionResult> Index(string? search)
         {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return View("Welcome");
+            }
             var query = _context.Items
                 .Include(i => i.Owner)
                 .Include(i => i.Images)
