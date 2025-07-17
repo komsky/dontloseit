@@ -20,57 +20,44 @@
     </div>
 </form>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Deadline</th>
-            <th>Seller</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
 @foreach (var item in Model.Items)
 {
-        <tr>
-            <td>
+        <div class="col d-flex">
+            <div class="card flex-fill h-100">
                 @if (item.Images.Any())
                 {
-                    <img src="/uploads/@item.Images.First().FileName" alt="@item.Name" style="max-width:80px;" />
+                    <img src="/uploads/@item.Images.First().FileName" class="card-img-top item-card-img" alt="@item.Name" />
                 }
-            </td>
-            <td>
-                <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id">
-                    @item.Name
-                </a>
-            </td>
-            <td>@item.Description</td>
-            <td>@(item.Price == null ? "Free" : item.Price?.ToString("C"))</td>
-            <td>@item.Deadline?.ToString("g")</td>
-            <td>
-                @if (item.Owner?.ProfileImageFileName != null)
-                {
-                    <img src="/uploads/@item.Owner.ProfileImageFileName" alt="@item.Owner.Email" style="width:32px;height:32px;border-radius:50%;margin-right:4px;" />
-                }
-                @item.Owner?.Email
-            </td>
-            <td>
-                @(item.IsReserved ? "Reserved" : item.IsSold ? "Sold" : "Available")
-            </td>
-            <td>
-                @if (!item.IsReserved && !item.IsSold)
-                {
-                    <form asp-action="Reserve" asp-route-id="@item.Id" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-primary">Reserve</button>
-                    </form>
-                }
-            </td>
-        </tr>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
+                    </h5>
+                    <p class="card-text mb-1"><strong>Price:</strong> @(item.Price == null ? "Free" : item.Price?.ToString("C"))</p>
+                    <div class="mt-auto">
+                        <small class="text-muted">
+                            @if (item.Owner?.ProfileImageFileName != null)
+                            {
+                                <img src="/uploads/@item.Owner.ProfileImageFileName" alt="@item.Owner.Email" class="seller-img me-1" />
+                            }
+                            @item.Owner?.Email
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    @if (!item.IsReserved && !item.IsSold)
+                    {
+                        <form asp-action="Reserve" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-primary">Reserve</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@(item.IsSold ? "Sold" : "Reserved")</span>
+                    }
+                </div>
+            </div>
+        </div>
 }
-    </tbody>
-</table>
+</div>
 
