@@ -35,3 +35,23 @@ header .navbar {
 footer {
   background-color: #f8f9fa;
 }
+
+/* Listing card styles */
+.item-card-img {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.seller-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (max-width: 576px) {
+  .item-card-img {
+    height: 150px;
+  }
+}
