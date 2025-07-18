@@ -1,6 +1,6 @@
 param(
     [string]$Destination = 'C:\\inetpub\\wwwroot\\fleamarket',
-    [string]$SiteName = 'fleamarket',
+    [string]$SiteName = 'fleamarket.adrianilewicz.com',
     [string]$AppPoolName = 'fleamarket'
 )
 

@@ -33,9 +33,9 @@ jobs:
             Write-Host "Stopping app-pool 'fleamarket'…"
             Stop-WebAppPool -Name 'fleamarket'
           }
-          if (Test-Path IIS:\Sites\FleaMarket) {
+          if (Test-Path IIS:\Sites\fleamarket.adrianilewicz.com) {
             Write-Host "Stopping site 'FleaMarket'…"
-            Stop-Website -Name 'FleaMarket'
+            Stop-Website -Name 'fleamarket.adrianilewicz.com'
           }
 
       # 2) Clean out the folder, ignoring any access-denied errors
@@ -67,4 +67,4 @@ jobs:
           Write-Host "Starting app-pool 'fleamarket'…"
           Start-WebAppPool -Name 'fleamarket'
           Write-Host "Starting site 'FleaMarket'…"
-          Start-Website -Name 'FleaMarket'
+          Start-Website -Name 'fleamarket.adrianilewicz.com'
