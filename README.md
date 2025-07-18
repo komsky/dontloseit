@@ -12,6 +12,22 @@ A private flea market.
 The site requires a shared password for new accounts. Set the
 `RegistrationPassword` value in *appsettings.json* to control who can join.
 
+## External Authentication
+
+The site supports Microsoft, Google, and Facebook logins. Configure the
+credentials using environment variables:
+
+```
+Authentication__Microsoft__ClientId=<id>
+Authentication__Microsoft__ClientSecret=<secret>
+Authentication__Google__ClientId=<id>
+Authentication__Google__ClientSecret=<secret>
+Authentication__Facebook__AppId=<id>
+Authentication__Facebook__AppSecret=<secret>
+```
+
+These values can also be stored in user secrets during development.
+
 
 ## Deployment
 

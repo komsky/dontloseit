@@ -19,6 +19,22 @@ namespace FleaMarket.FrontEnd
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddAuthentication()
+                .AddMicrosoftAccount(o =>
+                {
+                    o.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
+                    o.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
+                })
+                .AddGoogle(o =>
+                {
+                    o.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+                    o.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+                })
+                .AddFacebook(o =>
+                {
+                    o.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
+                    o.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+                });
             builder.Services.AddControllersWithViews();
 
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
@@ -45,6 +61,7 @@ namespace FleaMarket.FrontEnd
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
