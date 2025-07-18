@@ -29,9 +29,9 @@ jobs:
         shell: powershell
         run: |
           Import-Module WebAdministration
-          if (Test-Path IIS:\AppPools\FleaMarketAppPool) {
-            Write-Host "Stopping app-pool 'FleaMarketAppPool'…"
-            Stop-WebAppPool -Name 'FleaMarketAppPool'
+          if (Test-Path IIS:\AppPools\fleamarket) {
+            Write-Host "Stopping app-pool 'fleamarket'…"
+            Stop-WebAppPool -Name 'fleamarket'
           }
           if (Test-Path IIS:\Sites\FleaMarket) {
             Write-Host "Stopping site 'FleaMarket'…"
@@ -64,7 +64,7 @@ jobs:
         shell: powershell
         run: |
           Import-Module WebAdministration
-          Write-Host "Starting app-pool 'FleaMarketAppPool'…"
-          Start-WebAppPool -Name 'FleaMarketAppPool'
+          Write-Host "Starting app-pool 'fleamarket'…"
+          Start-WebAppPool -Name 'fleamarket'
           Write-Host "Starting site 'FleaMarket'…"
           Start-Website -Name 'FleaMarket'
