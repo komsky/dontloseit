@@ -29,11 +29,14 @@ namespace FleaMarket.FrontEnd
                 {
                     o.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
                     o.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+                    o.ClaimActions.MapJsonKey("picture", "picture", "url");
                 })
                 .AddFacebook(o =>
                 {
                     o.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
                     o.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+                    o.Fields.Add("picture");
+                    o.ClaimActions.MapJsonSubKey("urn:facebook:picture", "picture", "data", "url");
                 });
             builder.Services.AddControllersWithViews();
 
