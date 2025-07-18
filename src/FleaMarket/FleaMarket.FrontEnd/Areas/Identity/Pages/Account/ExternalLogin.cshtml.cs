@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using FleaMarket.FrontEnd.Models;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.Net.Http;
 
 namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
 {
@@ -18,19 +21,22 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IWebHostEnvironment env)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userStore = userStore;
             _logger = logger;
             _configuration = configuration;
+            _env = env;
         }
 
         [BindProperty]
@@ -133,6 +139,41 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
                 result = await _userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
+                    // Try to capture avatar from the external provider
+                    var avatarUrl =
+                        info.Principal.FindFirstValue("urn:google:picture") ??
+                        info.Principal.FindFirstValue("urn:facebook:picture") ??
+                        info.Principal.FindFirstValue("picture");
+
+                    if (!string.IsNullOrEmpty(avatarUrl))
+                    {
+                        try
+                        {
+                            using var httpClient = new HttpClient();
+                            var response = await httpClient.GetAsync(avatarUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var bytes = await response.Content.ReadAsByteArrayAsync();
+                                var uploadDir = Path.Combine(_env.WebRootPath, "uploads");
+                                Directory.CreateDirectory(uploadDir);
+                                var ext = Path.GetExtension(new Uri(avatarUrl).LocalPath);
+                                if (string.IsNullOrWhiteSpace(ext))
+                                {
+                                    ext = ".jpg";
+                                }
+                                var fileName = Guid.NewGuid() + ext;
+                                var filePath = Path.Combine(uploadDir, fileName);
+                                await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+                                user.ProfileImageFileName = fileName;
+                                await _userManager.UpdateAsync(user);
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore avatar download failures
+                        }
+                    }
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
                     _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
