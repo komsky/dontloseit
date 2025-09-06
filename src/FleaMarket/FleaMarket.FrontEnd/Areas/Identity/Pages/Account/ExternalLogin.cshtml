@@ -4,7 +4,8 @@
     ViewData["Title"] = "External Login";
 }
 
-<h1>Register with @Model.ProviderDisplayName</h1>
+<h1>Complete Registration</h1>
+<p class="text-muted mb-4">To complete your registration, please provide the site password that was given to you by the person who invited you to this marketplace.</p>
 
 <form method="post" asp-page-handler="Confirmation">
     <div asp-validation-summary="All" class="text-danger"></div>
@@ -15,7 +16,7 @@
     </div>
     <div class="form-floating mb-3">
         <input asp-for="Input.SitePassword" class="form-control" placeholder="Site password" />
-        <label asp-for="Input.SitePassword">Site Password</label>
+        <label asp-for="Input.SitePassword">Site Password (provided by your inviter)</label>
         <span asp-validation-for="Input.SitePassword" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Create Account</button>

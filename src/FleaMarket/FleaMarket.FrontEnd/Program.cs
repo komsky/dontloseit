@@ -3,6 +3,7 @@ using FleaMarket.FrontEnd.Services;
 using Microsoft.AspNetCore.Identity;
 using FleaMarket.FrontEnd.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 
 namespace FleaMarket.FrontEnd
 {

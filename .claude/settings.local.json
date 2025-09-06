@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet add package:*)",
+      "Bash(dotnet aspnet-codegenerator identity:*)",
+      "Bash(dotnet:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

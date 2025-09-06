@@ -163,7 +163,7 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
                                 }
                                 var fileName = Guid.NewGuid() + ext;
                                 var filePath = Path.Combine(uploadDir, fileName);
-                                await File.WriteAllBytesAsync(filePath, bytes);
+                                await System.IO.File.WriteAllBytesAsync(filePath, bytes);
                                 user.ProfileImageFileName = fileName;
                                 await _userManager.UpdateAsync(user);
                             }
