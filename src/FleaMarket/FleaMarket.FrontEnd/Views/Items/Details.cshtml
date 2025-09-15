@@ -8,24 +8,72 @@
     <div class="col-md-6">
         @if (Model.Images.Any())
         {
-            <div id="itemCarousel" class="carousel slide mb-3">
-                <div class="carousel-inner">
-                @for (int i = 0; i < Model.Images.Count; i++)
-                {
-                    var img = Model.Images.ElementAt(i);
-                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                        <img src="/uploads/@img.FileName" class="d-block w-100" alt="@Model.Name" />
-                    </div>
-                }
+            <!-- Main Image Display -->
+            <div class="mb-3">
+                <img id="mainImage" src="/uploads/@Model.Images.First().FileName" class="img-fluid rounded shadow-sm" alt="@Model.Name" style="width: 100%; height: 400px; object-fit: cover; cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#imageModal" />
+            </div>
+            
+            <!-- Image Thumbnails -->
+            @if (Model.Images.Count > 1)
+            {
+                <div class="row g-2">
+                    @for (int i = 0; i < Model.Images.Count; i++)
+                    {
+                        var img = Model.Images.ElementAt(i);
+                        <div class="col-3">
+                            <img src="/uploads/@img.FileName" 
+                                 class="img-thumbnail thumbnail-image @(i == 0 ? "active-thumbnail" : "")" 
+                                 alt="@Model.Name" 
+                                 style="height: 80px; object-fit: cover; cursor: pointer;"
+                                 onclick="changeMainImage('/uploads/@img.FileName', this)" />
+                        </div>
+                    }
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#itemCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#itemCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+            }
+            
+            <!-- Image Modal for Full View -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel">@Model.Name</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center p-0">
+                            <div id="fullImageCarousel" class="carousel slide">
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < Model.Images.Count; i++)
+                                    {
+                                        var img = Model.Images.ElementAt(i);
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <img src="/uploads/@img.FileName" class="d-block w-100" alt="@Model.Name" style="max-height: 70vh; object-fit: contain;" />
+                                        </div>
+                                    }
+                                </div>
+                                @if (Model.Images.Count > 1)
+                                {
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#fullImageCarousel" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#fullImageCarousel" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                <div class="text-center text-muted">
+                    <i class="fas fa-image fa-3x mb-2"></i>
+                    <p>No images available</p>
+                </div>
             </div>
         }
     </div>
@@ -33,14 +81,33 @@
         <p>@Model.Description</p>
         <p><strong>Price:</strong> @(Model.Price == null ? "Free" : Model.Price?.ToString("C"))</p>
         <p><strong>Deadline:</strong> @Model.Deadline?.ToString("g")</p>
-        <p>
-            <strong>Seller:</strong>
-            @if (Model.Owner?.ProfileImageFileName != null)
-            {
-                <img src="/uploads/@Model.Owner.ProfileImageFileName" alt="@Model.Owner.Email" style="width:32px;height:32px;border-radius:50%;margin-right:4px;" />
-            }
-            @Model.Owner?.Email
-        </p>
+        <div class="seller-info mb-3 p-3 border rounded bg-light">
+            <strong class="d-block mb-2">Seller:</strong>
+            <div class="d-flex align-items-center">
+                @if (Model.Owner?.ProfileImageFileName != null)
+                {
+                    <img src="/uploads/@Model.Owner.ProfileImageFileName" 
+                         alt="@(Model.Owner.UserName ?? Model.Owner.Email)" 
+                         class="rounded-circle me-3 shadow-sm" 
+                         style="width:50px;height:50px;object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                         style="width:50px;height:50px;color:white;font-weight:bold;font-size:18px;">
+                        @(string.IsNullOrEmpty(Model.Owner?.UserName) 
+                            ? Model.Owner?.Email?.Substring(0, 1).ToUpper() 
+                            : Model.Owner.UserName.Substring(0, 1).ToUpper())
+                    </div>
+                }
+                <div>
+                    <div class="fw-bold">
+                        @(Model.Owner?.UserName ?? Model.Owner?.Email?.Split('@')[0] ?? "Unknown")
+                    </div>
+                    <small class="text-muted">@Model.Owner?.Email</small>
+                </div>
+            </div>
+        </div>
         @if (!Model.IsReserved && !Model.IsSold)
         {
             <form asp-controller="Home" asp-action="Reserve" asp-route-id="@Model.Id" method="post">
@@ -53,3 +120,84 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function changeMainImage(imageSrc, thumbnailElement) {
+            // Update main image
+            document.getElementById('mainImage').src = imageSrc;
+            
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail-image').forEach(img => {
+                img.classList.remove('active-thumbnail');
+            });
+            thumbnailElement.classList.add('active-thumbnail');
+            
+            // Update modal carousel to show corresponding image
+            var thumbnails = document.querySelectorAll('.thumbnail-image');
+            var clickedIndex = Array.from(thumbnails).indexOf(thumbnailElement);
+            var modalCarousel = new bootstrap.Carousel(document.getElementById('fullImageCarousel'));
+            modalCarousel.to(clickedIndex);
+        }
+        
+        // Sync modal carousel with main image when modal opens
+        document.getElementById('imageModal').addEventListener('show.bs.modal', function () {
+            var mainImageSrc = document.getElementById('mainImage').src;
+            var carouselItems = document.querySelectorAll('#fullImageCarousel .carousel-item img');
+            
+            carouselItems.forEach((img, index) => {
+                if (img.src === mainImageSrc) {
+                    var modalCarousel = new bootstrap.Carousel(document.getElementById('fullImageCarousel'));
+                    modalCarousel.to(index);
+                }
+            });
+        });
+        
+        // Update main image when modal carousel slides
+        document.getElementById('fullImageCarousel').addEventListener('slide.bs.carousel', function (e) {
+            var nextImg = e.relatedTarget.querySelector('img');
+            if (nextImg) {
+                document.getElementById('mainImage').src = nextImg.src;
+                
+                // Update active thumbnail
+                var thumbnails = document.querySelectorAll('.thumbnail-image');
+                thumbnails.forEach(thumb => thumb.classList.remove('active-thumbnail'));
+                if (thumbnails[e.to]) {
+                    thumbnails[e.to].classList.add('active-thumbnail');
+                }
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .active-thumbnail {
+            border: 3px solid #0d6efd !important;
+            opacity: 1 !important;
+        }
+        
+        .thumbnail-image {
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+        
+        .thumbnail-image:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        .seller-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        #mainImage:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s ease;
+        }
+        
+        .modal-body .carousel-item img {
+            border-radius: 8px;
+        }
+    </style>
+}

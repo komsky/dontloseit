@@ -65,10 +65,12 @@ namespace FleaMarket.FrontEnd.Controllers
                         using var stream = new FileStream(filePath, FileMode.Create);
                         await image.CopyToAsync(stream);
 
-                        item.Images.Add(new ItemImage
+                        var itemImage = new ItemImage
                         {
-                            FileName = fileName
-                        });
+                            FileName = fileName,
+                            ItemId = item.Id
+                        };
+                        _context.ItemImages.Add(itemImage);
                     }
                 }
 
@@ -180,7 +182,12 @@ namespace FleaMarket.FrontEnd.Controllers
                         var filePath = Path.Combine(uploadDir, fileName);
                         using var stream = new FileStream(filePath, FileMode.Create);
                         await image.CopyToAsync(stream);
-                        item.Images.Add(new ItemImage { FileName = fileName });
+                        var itemImage = new ItemImage 
+                        { 
+                            FileName = fileName,
+                            ItemId = item.Id 
+                        };
+                        _context.ItemImages.Add(itemImage);
                     }
                 }
             }

@@ -20,17 +20,37 @@ namespace FleaMarket.FrontEnd
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            
+            // Configure external authentication cookie to persist longer
+            builder.Services.ConfigureExternalCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(15); // 15 minutes instead of default
+                options.SlidingExpiration = true;
+            });
+            
             builder.Services.AddAuthentication()
                 .AddMicrosoftAccount(o =>
                 {
                     o.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"]!;
                     o.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"]!;
+                    o.Events.OnRemoteFailure = context =>
+                    {
+                        context.Response.Redirect("/Identity/Account/ExternalLogin?handler=Callback&remoteError=access_denied");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    };
                 })
                 .AddGoogle(o =>
                 {
                     o.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
                     o.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
                     o.ClaimActions.MapJsonKey("picture", "picture", "url");
+                    o.Events.OnRemoteFailure = context =>
+                    {
+                        context.Response.Redirect("/Identity/Account/ExternalLogin?handler=Callback&remoteError=access_denied");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    };
                 })
                 .AddFacebook(o =>
                 {
@@ -38,6 +58,12 @@ namespace FleaMarket.FrontEnd
                     o.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
                     o.Fields.Add("picture");
                     o.ClaimActions.MapJsonSubKey("urn:facebook:picture", "picture", "data", "url");
+                    o.Events.OnRemoteFailure = context =>
+                    {
+                        context.Response.Redirect("/Identity/Account/ExternalLogin?handler=Callback&remoteError=access_denied");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    };
                 });
             builder.Services.AddControllersWithViews();
 
