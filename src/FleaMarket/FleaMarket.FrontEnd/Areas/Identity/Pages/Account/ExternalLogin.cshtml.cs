@@ -145,7 +145,53 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
                 ErrorMessage = "An unexpected error occurred during login. Please try again.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
-            
+
+            // Check if user already exists with the same email address
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (!string.IsNullOrEmpty(email))
+            {
+                var existingUser = await _userManager.FindByEmailAsync(email);
+                if (existingUser != null)
+                {
+                    // User exists with same email - merge the accounts automatically
+                    _logger.LogInformation("Merging external login {Provider} with existing account for {Email}", info.LoginProvider, email);
+
+                    var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                    if (addLoginResult.Succeeded)
+                    {
+                        // Update avatar from external provider if user doesn't have one
+                        if (string.IsNullOrEmpty(existingUser.ProfileImageFileName))
+                        {
+                            await UpdateUserAvatarFromProvider(existingUser, info);
+                        }
+
+                        // Sign in the merged account
+                        await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                        await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+                        _logger.LogInformation("Successfully merged and signed in user {Email} with {Provider}", email, info.LoginProvider);
+                        return LocalRedirect(returnUrl);
+                    }
+                    else
+                    {
+                        // If adding login fails (e.g., already exists), try to sign in anyway
+                        var mergedSignInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+                        if (mergedSignInResult.Succeeded)
+                        {
+                            await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
+                            _logger.LogInformation("User {Email} signed in with existing {Provider} login", email, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+                        else
+                        {
+                            // If we still can't sign in, sign them in with the existing account
+                            await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                            _logger.LogInformation("Signed in existing user {Email} after external login attempt", email);
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+                }
+            }
+
             // User doesn't exist, proceed to registration
             {
                 // Store the external login info in TempData for the confirmation step
@@ -166,7 +212,7 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
 
                 // Store in TempData for the POST request
                 TempData["ExternalLoginData"] = JsonSerializer.Serialize(externalLoginData);
-                
+
                 return Page();
             }
         }
@@ -369,6 +415,45 @@ namespace FleaMarket.FrontEnd.Areas.Identity.Pages.Account
 
             ProviderDisplayName = externalLoginData.ProviderDisplayName;
             return Page();
+        }
+
+        private async Task UpdateUserAvatarFromProvider(ApplicationUser user, ExternalLoginInfo info)
+        {
+            try
+            {
+                var avatarUrl =
+                    info.Principal.FindFirstValue("urn:google:picture") ??
+                    info.Principal.FindFirstValue("urn:facebook:picture") ??
+                    info.Principal.FindFirstValue("picture");
+
+                if (!string.IsNullOrEmpty(avatarUrl))
+                {
+                    using var httpClient = new HttpClient();
+                    var response = await httpClient.GetAsync(avatarUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var bytes = await response.Content.ReadAsByteArrayAsync();
+                        var uploadDir = Path.Combine(_env.WebRootPath, "uploads");
+                        Directory.CreateDirectory(uploadDir);
+                        var ext = Path.GetExtension(new Uri(avatarUrl).LocalPath);
+                        if (string.IsNullOrWhiteSpace(ext))
+                        {
+                            ext = ".jpg";
+                        }
+                        var fileName = Guid.NewGuid() + ext;
+                        var filePath = Path.Combine(uploadDir, fileName);
+                        await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+                        user.ProfileImageFileName = fileName;
+                        await _userManager.UpdateAsync(user);
+                        _logger.LogInformation("Updated avatar for user {Email} from {Provider}", user.Email, info.LoginProvider);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to download avatar for user {Email} from {Provider}", user.Email, info.LoginProvider);
+                // Continue without avatar - don't fail the entire process
+            }
         }
     }
 }
