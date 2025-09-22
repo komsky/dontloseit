@@ -51,6 +51,32 @@ namespace FleaMarket.FrontEnd.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> Browse(string? search)
+        {
+            var query = _context.Items
+                .Include(i => i.Owner)
+                .Include(i => i.Images)
+                .Where(i => !i.IsArchived && !i.IsSold);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(i => i.Name.Contains(search) || (i.Description != null && i.Description.Contains(search)));
+            }
+
+            var items = await query
+                .OrderBy(i => i.Price == null ? 0 : 1)
+                .ThenBy(i => i.Name)
+                .ToListAsync();
+
+            var model = new ItemsIndexViewModel
+            {
+                Items = items,
+                Search = search
+            };
+
+            return View(model);
+        }
+
         public IActionResult Privacy()
         {
             return View();

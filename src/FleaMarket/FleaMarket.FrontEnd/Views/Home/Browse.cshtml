@@ -1,0 +1,242 @@
+@model FleaMarket.FrontEnd.Models.ItemsIndexViewModel
+@{
+    ViewData["Title"] = "Browse Items";
+}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Browse Items</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-white">Home</a></li>
+        <li class="breadcrumb-item active text-white">Browse</li>
+    </ol>
+</div>
+<!-- Page Header End -->
+
+<!-- Fruits Shop Start -->
+<div class="container-fluid shop py-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <!-- Sidebar Start -->
+            <div class="col-lg-3">
+                <div class="row g-4">
+                    <!-- Search -->
+                    <div class="col-lg-12">
+                        <div class="mb-3">
+                            <h4>Search Items</h4>
+                            <form method="get" class="d-flex">
+                                <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search for items...">
+                                <button type="submit" class="btn btn-primary ms-2">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Categories -->
+                    <div class="col-lg-12">
+                        <div class="mb-3">
+                            <h4 class="mb-3">Categories</h4>
+                            <ul class="list-unstyled categories">
+                                <li>
+                                    <div class="categories-item">
+                                        <a href="#" class="text-dark"><i class="fas fa-home text-secondary me-2"></i>Household Items</a>
+                                        <span>(15)</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="categories-item">
+                                        <a href="#" class="text-dark"><i class="fas fa-laptop text-secondary me-2"></i>Electronics</a>
+                                        <span>(8)</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="categories-item">
+                                        <a href="#" class="text-dark"><i class="fas fa-tshirt text-secondary me-2"></i>Clothing</a>
+                                        <span>(12)</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="categories-item">
+                                        <a href="#" class="text-dark"><i class="fas fa-book text-secondary me-2"></i>Books</a>
+                                        <span>(5)</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="categories-item">
+                                        <a href="#" class="text-dark"><i class="fas fa-gamepad text-secondary me-2"></i>Games & Toys</a>
+                                        <span>(3)</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Featured Items -->
+                    <div class="col-lg-12">
+                        <div class="featured-product mb-4">
+                            <h4 class="mb-3">Featured Items</h4>
+                            @foreach (var featuredItem in Model.Items.Take(3))
+                            {
+                                <div class="featured-product-item d-flex mb-3">
+                                    <div class="rounded me-4" style="width: 100px; height: 100px;">
+                                        @if (featuredItem.Images.Any())
+                                        {
+                                            <img src="/uploads/@featuredItem.Images.First().FileName" class="img-fluid rounded" alt="@featuredItem.Name" style="width: 100px; height: 100px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-2">@featuredItem.Name</h6>
+                                        <div class="d-flex mb-2">
+                                            <h5 class="fw-bold me-2">@(featuredItem.Price == null ? "Free" : featuredItem.Price?.ToString("C"))</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Sidebar End -->
+
+            <!-- Product Grid Start -->
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="row g-4 justify-content-between">
+                            <div class="col-lg-6">
+                                <h5>Showing @Model.Items.Count items</h5>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="d-flex justify-content-end">
+                                    <select class="form-select" style="width: 200px;">
+                                        <option value="default">Default Sorting</option>
+                                        <option value="name">Name</option>
+                                        <option value="price-low">Price: Low to High</option>
+                                        <option value="price-high">Price: High to Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Grid -->
+                <div class="row g-4 product mt-4">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="product-item rounded wow fadeInUp" data-wow-delay="0.1s">
+                                <div class="product-item-inner border rounded">
+                                    <div class="product-item-inner-item">
+                                        @if (item.Images.Any())
+                                        {
+                                            <img src="/uploads/@item.Images.First().FileName" class="img-fluid w-100 rounded-top" alt="@item.Name" style="height: 250px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded-top d-flex align-items-center justify-content-center" style="height: 250px;">
+                                                <i class="fas fa-image fa-3x text-muted"></i>
+                                            </div>
+                                        }
+                                        @if (item.IsReserved)
+                                        {
+                                            <div class="product-new bg-warning">Reserved</div>
+                                        }
+                                        else if (item.Price == null)
+                                        {
+                                            <div class="product-new bg-success">Free</div>
+                                        }
+                                        <div class="product-details">
+                                            <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id"><i class="fa fa-eye fa-1x"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="text-center rounded-bottom p-4">
+                                        <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="d-block mb-2 text-muted">
+                                            @(item.Owner?.UserName ?? item.Owner?.Email?.Split('@')[0] ?? "Unknown Seller")
+                                        </a>
+                                        <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id" class="d-block h5 text-dark">
+                                            @item.Name
+                                        </a>
+                                        @if (item.Price.HasValue)
+                                        {
+                                            <span class="text-primary fs-5">@item.Price?.ToString("C")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success fs-5 fw-bold">Free</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="product-item-add border border-top-0 rounded-bottom text-center p-4 pt-0">
+                                    @if (!item.IsReserved && !item.IsSold)
+                                    {
+                                        <form asp-controller="Home" asp-action="Reserve" asp-route-id="@item.Id" method="post">
+                                            <button type="submit" class="btn btn-primary border-secondary rounded-pill py-2 px-4 mb-4">
+                                                <i class="fas fa-bookmark me-2"></i> Reserve Item
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="btn btn-secondary rounded-pill py-2 px-4 mb-4 disabled">
+                                            @(item.IsSold ? "Sold" : "Reserved")
+                                        </span>
+                                    }
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="seller-info">
+                                            @if (item.Owner?.ProfileImageFileName != null)
+                                            {
+                                                <img src="/uploads/@item.Owner.ProfileImageFileName" 
+                                                     alt="Seller" 
+                                                     class="rounded-circle" 
+                                                     style="width:30px;height:30px;object-fit:cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                                     style="width:30px;height:30px;color:white;font-size:12px;">
+                                                    @(string.IsNullOrEmpty(item.Owner?.UserName) 
+                                                        ? item.Owner?.Email?.Substring(0, 1).ToUpper() 
+                                                        : item.Owner.UserName.Substring(0, 1).ToUpper())
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="d-flex">
+                                            <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id"
+                                               class="text-primary d-flex align-items-center justify-content-center me-0">
+                                                <span class="rounded-circle btn-sm-square border">
+                                                    <i class="fas fa-eye"></i>
+                                                </span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (!Model.Items.Any())
+                {
+                    <div class="row">
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No items found</h4>
+                            <p class="text-muted">Try adjusting your search criteria or browse all available items.</p>
+                            <a asp-controller="Home" asp-action="Browse" class="btn btn-primary">Browse All Items</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- Product Grid End -->
+        </div>
+    </div>
+</div>
+<!-- Fruits Shop End -->

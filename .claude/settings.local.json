@@ -3,7 +3,11 @@
     "allow": [
       "Bash(dotnet add package:*)",
       "Bash(dotnet aspnet-codegenerator identity:*)",
-      "Bash(dotnet:*)"
+      "Bash(dotnet:*)",
+      "Bash(timeout:*)",
+      "Bash(taskkill:*)",
+      "Bash(xcopy:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []
