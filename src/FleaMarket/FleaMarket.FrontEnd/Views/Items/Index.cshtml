@@ -51,25 +51,35 @@
             <td>@item.Deadline?.ToString("g")</td>
             <td>@(item.IsSold ? "Sold" : item.IsReserved ? "Reserved" : "Available")</td>
             <td>
-                <div class="btn-group" role="group">
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">Edit</a>
+                <div class="btn-group" role="group" aria-label="Item actions">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
                     @if (!item.IsSold)
                     {
-                        <form asp-action="MarkSold" asp-route-id="@item.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">Mark Sold</button>
+                        <form asp-action="MarkSold" asp-route-id="@item.Id" method="post" style="display: contents;">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i> Mark Sold
+                            </button>
                         </form>
                     }
                     else
                     {
-                        <form asp-action="MarkAvailable" asp-route-id="@item.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">Mark Available</button>
+                        <form asp-action="MarkAvailable" asp-route-id="@item.Id" method="post" style="display: contents;">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="fas fa-undo"></i> Mark Available
+                            </button>
                         </form>
                     }
-                    <form asp-action="Archive" asp-route-id="@item.Id" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-warning">Archive</button>
+                    <form asp-action="Archive" asp-route-id="@item.Id" method="post" style="display: contents;">
+                            <button type="submit" class="btn btn-sm btn-warning">
+                            <i class="fas fa-archive"></i> Archive
+                        </button>
                     </form>
-                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this item?');">
-                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display: contents;" onsubmit="return confirm('Delete this item?');">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
                     </form>
                 </div>
             </td>

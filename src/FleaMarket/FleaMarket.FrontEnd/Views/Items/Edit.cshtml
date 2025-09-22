@@ -33,6 +33,12 @@
         <span asp-validation-for="Deadline" class="text-danger"></span>
     </div>
     <div class="mb-3">
+        <label asp-for="Category" class="form-label"></label>
+        <input asp-for="Category" class="form-control" placeholder="e.g., Electronics, Household Items, Books..." />
+        <span asp-validation-for="Category" class="text-danger"></span>
+        <div class="form-text">Choose a category to help others find your item more easily.</div>
+    </div>
+    <div class="mb-3">
         <label for="images" class="form-label">Add Photos</label>
         <input type="file" name="Images" multiple accept="image/*" class="form-control" />
     </div>

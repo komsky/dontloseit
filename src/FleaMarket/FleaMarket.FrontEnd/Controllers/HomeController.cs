@@ -51,7 +51,7 @@ namespace FleaMarket.FrontEnd.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Browse(string? search)
+        public async Task<IActionResult> Browse(string? search, string? category)
         {
             var query = _context.Items
                 .Include(i => i.Owner)
@@ -63,15 +63,31 @@ namespace FleaMarket.FrontEnd.Controllers
                 query = query.Where(i => i.Name.Contains(search) || (i.Description != null && i.Description.Contains(search)));
             }
 
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                query = query.Where(i => i.Category == category);
+            }
+
             var items = await query
                 .OrderBy(i => i.Price == null ? 0 : 1)
                 .ThenBy(i => i.Name)
                 .ToListAsync();
 
+            // Get category counts for all available items (not filtered by current category selection)
+            var allAvailableItems = await _context.Items
+                .Where(i => !i.IsArchived && !i.IsSold && !string.IsNullOrEmpty(i.Category))
+                .ToListAsync();
+
+            var categories = allAvailableItems
+                .GroupBy(i => i.Category!)
+                .ToDictionary(g => g.Key, g => g.Count());
+
             var model = new ItemsIndexViewModel
             {
                 Items = items,
-                Search = search
+                Search = search,
+                Category = category,
+                Categories = categories
             };
 
             return View(model);

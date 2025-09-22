@@ -21,13 +21,16 @@
 </form>
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-@foreach (var item in Model.Items)
-{
+    @foreach (var item in Model.Items)
+    {
         <div class="col d-flex">
             <div class="card flex-fill h-100">
                 @if (item.Images.Any())
                 {
-                    <img src="/uploads/@item.Images.First().FileName" class="card-img-top item-card-img" alt="@item.Name" />
+                    <a asp-controller="Items" asp-action="Details" asp-route-id="@item.Id">
+                        <img src="/uploads/@item.Images.First().FileName" class="card-img-top item-card-img" alt="@item.Name" />
+                    </a>
+
                 }
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
@@ -58,6 +61,6 @@
                 </div>
             </div>
         </div>
-}
+    }
 </div>
 

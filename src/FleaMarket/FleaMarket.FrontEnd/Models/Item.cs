@@ -23,6 +23,9 @@ namespace FleaMarket.FrontEnd.Models
 
         public bool IsSold { get; set; }
 
+        [MaxLength(50)]
+        public string? Category { get; set; }
+
         public string? OwnerId { get; set; }
         public ApplicationUser? Owner { get; set; }
 

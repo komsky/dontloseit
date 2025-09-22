@@ -4,6 +4,7 @@ using FleaMarket.FrontEnd.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FleaMarket.FrontEnd.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250922064333_AddCategoryToItems")]
+    partial class AddCategoryToItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,7 +135,7 @@ namespace FleaMarket.FrontEnd.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("FleaMarket.FrontEnd.Models.ItemImage", b =>
@@ -154,7 +157,7 @@ namespace FleaMarket.FrontEnd.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("ItemImages", (string)null);
+                    b.ToTable("ItemImages");
                 });
 
             modelBuilder.Entity("FleaMarket.FrontEnd.Models.Reservation", b =>
@@ -181,7 +184,7 @@ namespace FleaMarket.FrontEnd.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("Reservations", (string)null);
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

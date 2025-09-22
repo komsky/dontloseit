@@ -54,6 +54,10 @@
     height: 56px;
 }
 
+.btn-panel {
+    border-radius: 0px !important;
+}
+
 .btn-square,
 .btn-sm-square,
 .btn-md-square,

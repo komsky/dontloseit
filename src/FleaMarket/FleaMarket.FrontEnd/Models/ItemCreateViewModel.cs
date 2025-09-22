@@ -19,6 +19,10 @@ namespace FleaMarket.FrontEnd.Models
         [DataType(DataType.DateTime)]
         public DateTime? Deadline { get; set; }
 
+        [MaxLength(50)]
+        [Display(Name = "Category")]
+        public string? Category { get; set; }
+
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
     }
 }
