@@ -1,0 +1,148 @@
+name: Build and Deploy Flea Market
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: 'src/FleaMarket/FleaMarket.FrontEnd'
+  SOLUTION_PATH: 'src/FleaMarket/FleaMarket.sln'
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: [self-hosted, windows, nuc.hospitalit.co.uk]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build application
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+    - name: Run tests (if any)
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
+      continue-on-error: true
+
+    - name: Publish application
+      run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --no-build --output ./publish
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: published-app
+        path: ./publish/
+        retention-days: 1
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: [self-hosted, linux, ubuntubox-]
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: published-app
+        path: ./app
+
+    - name: Stop existing application
+      run: |
+        sudo systemctl stop fleamarket || true
+
+    - name: Backup current deployment
+      run: |
+        if [ -d "/var/www/fleamarket" ]; then
+          sudo cp -r /var/www/fleamarket /var/www/fleamarket.backup.$(date +%Y%m%d-%H%M%S)
+        fi
+
+    - name: Deploy new version
+      run: |
+        sudo rm -rf /var/www/fleamarket
+        sudo mkdir -p /var/www/fleamarket
+        sudo cp -r ./app/* /var/www/fleamarket/
+        sudo chown -R www-data:www-data /var/www/fleamarket
+        sudo chmod -R 755 /var/www/fleamarket
+
+    - name: Update appsettings for production
+      run: |
+        sudo tee /var/www/fleamarket/appsettings.Production.json > /dev/null <<EOF
+        {
+          "Logging": {
+            "LogLevel": {
+              "Default": "Information",
+              "Microsoft.AspNetCore": "Warning"
+            }
+          },
+          "AllowedHosts": "*",
+          "ConnectionStrings": {
+            "DefaultConnection": "${{ secrets.PROD_CONNECTION_STRING }}"
+          },
+          "RegistrationPassword": "${{ secrets.REGISTRATION_PASSWORD }}",
+          "Authentication": {
+            "Google": {
+              "ClientId": "${{ secrets.GOOGLE_CLIENT_ID }}",
+              "ClientSecret": "${{ secrets.GOOGLE_CLIENT_SECRET }}"
+            },
+            "Facebook": {
+              "AppId": "${{ secrets.FACEBOOK_APP_ID }}",
+              "AppSecret": "${{ secrets.FACEBOOK_APP_SECRET }}"
+            }
+          }
+        }
+        EOF
+
+    - name: Create systemd service file
+      run: |
+        sudo tee /etc/systemd/system/fleamarket.service > /dev/null <<EOF
+        [Unit]
+        Description=Flea Market ASP.NET Core App
+        After=network.target
+
+        [Service]
+        Type=notify
+        WorkingDirectory=/var/www/fleamarket
+        ExecStart=/usr/bin/dotnet /var/www/fleamarket/FleaMarket.FrontEnd.dll
+        Restart=always
+        RestartSec=10
+        KillSignal=SIGINT
+        SyslogIdentifier=fleamarket
+        User=www-data
+        Environment=ASPNETCORE_ENVIRONMENT=Production
+        Environment=ASPNETCORE_URLS=http://localhost:5000
+
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+
+    - name: Reload systemd and start application
+      run: |
+        sudo systemctl daemon-reload
+        sudo systemctl enable fleamarket
+        sudo systemctl start fleamarket
+
+    - name: Wait for application to start
+      run: |
+        sleep 10
+        curl -f http://localhost:5000/health || curl -f http://localhost:5000/ || echo "Application may still be starting..."
+
+    - name: Check application status
+      run: |
+        sudo systemctl status fleamarket --no-pager
+
+    - name: Clean up old backups (keep last 5)
+      run: |
+        cd /var/www
+        sudo find . -name "fleamarket.backup.*" -type d | head -n -5 | sudo xargs rm -rf || true
